@@ -1,4 +1,3 @@
-```markdown
 # HiddenSentimentNLP
 
 ## Overview
@@ -57,7 +56,7 @@ project-root/
 - **Chrome Extension:**
   - Navigate to the `src/chrome_extension` folder.
   - Load the extension in Chrome via `chrome://extensions` (enable Developer Mode and load unpacked).
-  
+
 - **Python Scripts:**
   - Run `data_preprocessing.py` and `model_training.py` from the `src/python` directory to preprocess data and train the model.
   - Use the Jupyter notebook (`experiment_notebook.ipynb`) for exploratory data analysis and experiments.
@@ -69,11 +68,10 @@ project-root/
     ```
 
 ## License
-This project is licensed under the MIT License. See the (LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Contribution
 Contributions are welcome! If you have suggestions, improvements, or bug fixes, please open an issue or submit a pull request. For larger changes, please discuss them first via an issue.
 
 ## Contact
 For any questions or suggestions, please contact Waseem Khan at wk23aau@herts.ac.uk.
-```
