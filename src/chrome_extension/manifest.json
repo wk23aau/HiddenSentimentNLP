@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Reviews Collector",
+  "version": "1.0",
+  "description": "Collect product reviews from Amazon store pages and review pages using AJAX.",
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://www.amazon.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Amazon Reviews Collector"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.amazon.com/stores/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.amazon.com/product-reviews/*"],
+      "js": ["review.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
