@@ -37,6 +37,7 @@ ENV/
 env.bak/
 venv.bak/
 myenv
+.env
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
@@ -62,8 +63,8 @@ coverage.xml
 .pytest_cache/
 
 # Data files (if you don't want to track raw or processed data)
-data/raw/
-data/processed/
+# data/raw/
+# data/processed/
 
 # Models and outputs (if you don't want to track large files)
 models/
