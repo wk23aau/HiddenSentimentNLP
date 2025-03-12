@@ -15,21 +15,21 @@ Cover Page
 Table of Contents
 -----------------
 
-1.  [Abstract](#1.-abstract)
+1.  [Abstract](#1-abstract)
     
-2.  [Introduction](#2.-introduction)
+2.  [Introduction](#2-introduction)
     
-3.  [Literature Review](#3.-literature-review)
+3.  [Literature Review](#3-literature-review)
     
-4.  [Methodology](#4.-methodology)
+4.  [Methodology](#4-methodology)
     
-5.  [Quality & Results](#5.-quality--results)
+5.  [Quality & Results](#5-quality--results)
     
-6.  [Evaluation & Conclusion](#6.-evaluation--conclusion)
+6.  [Evaluation & Conclusion](#6-evaluation--conclusion)
     
-7.  [References](#7.-references)
+7.  [References](#7-references)
     
-8.  [Appendices](#8.-appendices)
+8.  [Appendices](#8-appendices)
     
 
 # 1. Abstract
