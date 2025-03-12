@@ -47,12 +47,12 @@ Table of Contents
 *   **Future Work:** My plan for further model tuning, quantitative evaluation (using metrics like accuracy and F1-score), and extended testing.
     
 
-2\. Introduction
+# 2. Introduction
 ----------------
 
-**What I Have Done:**I have clearly outlined my research problem, objectives, and theoretical challenges. I’ve introduced the idea of hidden sentiment in mixed reviews and explained why it is a critical issue.
+**What I Have Done:** I have clearly outlined my research problem, objectives, and theoretical challenges. I’ve introduced the idea of hidden sentiment in mixed reviews and explained why it is a critical issue.
 
-**What I Need to Do:**I will expand this section by:
+**What I Need to Do:** I will expand this section by:
 
 *   Emphasizing the real-world impact of detecting hidden sentiment, such as enhancing customer insights and improving targeted marketing strategies.
     
