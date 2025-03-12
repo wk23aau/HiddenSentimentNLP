@@ -6,7 +6,11 @@ Project Plan
 Cover Page
 ----------
 
-**Title:** An Investigative Study Comparing Transformer-Based NLP Models and Traditional Methods for Uncovering Hidden Positive Sentiment in Customer Reviews**Module Title:** Advanced Computer Science Masters Project**Module Code:** 7COM1039-0206-2024
+**Title:** An Investigative Study Comparing Transformer-Based NLP Models and Traditional Methods for Uncovering Hidden Positive Sentiment in Customer Reviews
+
+**Module Title:** Advanced Computer Science Masters Project
+
+**Module Code:** 7COM1039-0206-2024
 
 Table of Contents
 -----------------
@@ -28,12 +32,11 @@ Table of Contents
 8.  [Appendices](#appendices)
     
 
-1\. Abstract
-------------
+# Abstract
 
-**What I Have Done:**I have introduced the overall goals of my project in the Background section, discussing the challenge of detecting hidden positive sentiment in customer reviews using transformer-based NLP models.
+**What I Have Done:** I have introduced the overall goals of my project in the Background section, discussing the challenge of detecting hidden positive sentiment in customer reviews using transformer-based NLP models.
 
-**What I Need to Do:**I will draft a dedicated abstract (within 200 words) that clearly summarizes:
+**What I Need to Do:** I will draft a dedicated abstract (within 200 words) that clearly summarizes:
 
 *   **The Problem:** The difficulty of uncovering subtle positive sentiment in low-rated reviews.
     
@@ -112,7 +115,7 @@ Table of Contents
 *   Writing a thorough conclusion that synthesizes my findings, links them back to my original research objectives, and provides clear recommendations for future work (for example, exploring multilingual sentiment analysis or improving model interpretability).
     
 
-7\. References
+# References
 --------------
 
 **What I Have Done:**I have collected a set of relevant studies, including research on BERT, ABSA, and implicit sentiment analysis. My references are currently in Harvard style, but there are some inconsistencies.
