@@ -25,11 +25,11 @@ def extract_date(date_str):
     """
     if not isinstance(date_str, str):
         return None
-    
+
     prefix = "Reviewed in the United States on "
     if date_str.startswith(prefix):
         date_str = date_str[len(prefix):]
-    
+
     # Attempt to parse the remaining text as a date
     try:
         parsed = pd.to_datetime(date_str, errors='coerce')
@@ -99,41 +99,54 @@ def preprocess_dataframe(df):
         df['reviewDate_parsed'] = df['reviewDate'].apply(extract_date)
     else:
         print("Warning: 'reviewDate' column not found.")
-    
+
     return df
 
-def process_files(input_dir, output_dir):
+def process_files_and_combine(input_dir, output_dir, output_filename="combined_processed_data.csv"):
     """
-    Process all CSV files in the input directory.
-    Each file is loaded, preprocessed, and then saved to the output directory.
+    Process all CSV files in the input directory, preprocess them,
+    and combine all processed data into a single CSV file in the output directory.
     """
     os.makedirs(output_dir, exist_ok=True)
     csv_files = glob.glob(os.path.join(input_dir, '*.csv'))
-    
+
     if not csv_files:
         print("No CSV files found in the input directory.")
-        return
-    
+        return None  # Return None to indicate no combined file was created
+
+    processed_dfs = []
     for file_path in csv_files:
         print(f"Processing {file_path}...")
         df = load_data(file_path)
         if df is None or df.empty:
             continue
         df_clean = preprocess_dataframe(df)
-        file_name = os.path.basename(file_path)
-        output_file = os.path.join(output_dir, file_name)
-        
-        try:
-            df_clean.to_csv(output_file, index=False)
-            print(f"Saved cleaned data to {output_file}")
-        except Exception as e:
-            print(f"Error saving {output_file}: {e}")
+        processed_dfs.append(df_clean)
+
+    if not processed_dfs:
+        print("No dataframes were successfully processed. No combined file will be created.")
+        return None  # Return None if no dataframes were processed
+
+    combined_df = pd.concat(processed_dfs, ignore_index=True)
+    output_file = os.path.join(output_dir, output_filename)
+
+    try:
+        combined_df.to_csv(output_file, index=False)
+        print(f"Saved combined cleaned data to {output_file}")
+        return combined_df # Return the combined dataframe
+    except Exception as e:
+        print(f"Error saving combined file {output_file}: {e}")
+        return None # Return None in case of error
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Batch Data Preprocessing for HiddenSentimentNLP Dataset")
+    parser = argparse.ArgumentParser(description="Batch Data Preprocessing and Combine for HiddenSentimentNLP Dataset")
     parser.add_argument('--input_dir', type=str, default='data/raw', help="Directory containing raw CSV files")
-    parser.add_argument('--output_dir', type=str, default='data/processed', help="Directory to save cleaned CSV files")
+    parser.add_argument('--output_dir', type=str, default='data/processed', help="Directory to save the combined cleaned CSV file")
+    parser.add_argument('--output_filename', type=str, default='combined_processed_data.csv', help="Filename for the combined output CSV file")
     args = parser.parse_args()
-    
-    process_files(args.input_dir, args.output_dir)
-    print("All files processed.")
+
+    combined_data = process_files_and_combine(args.input_dir, args.output_dir, args.output_filename)
+    if combined_data is not None:
+        print("All files processed and combined.")
+    else:
+        print("Processing and combining completed with potential issues. Check logs for details.")
