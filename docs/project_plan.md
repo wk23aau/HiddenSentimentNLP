@@ -6,34 +6,37 @@ Project Plan
 Cover Page
 ----------
 
-**Title:** An Investigative Study Comparing Transformer-Based NLP Models and Traditional Methods for Uncovering Hidden Positive Sentiment in Customer Reviews**Module Title:** Advanced Computer Science Masters Project**Module Code:** 7COM1039-0206-2024
+**Title:** An Investigative Study Comparing Transformer-Based NLP Models and Traditional Methods for Uncovering Hidden Positive Sentiment in Customer Reviews
+
+**Module Title:** Advanced Computer Science Masters Project
+
+**Module Code:** 7COM1039-0206-2024
 
 Table of Contents
 -----------------
 
-1.  [Abstract](#abstract)
+1.  [Abstract](#1-abstract)
     
-2.  [Introduction](#introduction)
+2.  [Introduction](#2-introduction)
     
-3.  [Literature Review](#literature-review)
+3.  [Literature Review](#3-literature-review)
     
-4.  [Methodology](#methodology)
+4.  [Methodology](#4-methodology)
     
-5.  [Quality & Results](#quality--results)
+5.  [Quality & Results](#5-quality--results)
     
-6.  [Evaluation & Conclusion](#evaluation--conclusion)
+6.  [Evaluation & Conclusion](#6-evaluation--conclusion)
     
-7.  [References](#references)
+7.  [References](#7-references)
     
-8.  [Appendices](#appendices)
+8.  [Appendices](#8-appendices)
     
 
-1\. Abstract
-------------
+# 1. Abstract
+----------------
+**What I Have Done:** I have introduced the overall goals of my project in the Background section, discussing the challenge of detecting hidden positive sentiment in customer reviews using transformer-based NLP models.
 
-**What I Have Done:**I have introduced the overall goals of my project in the Background section, discussing the challenge of detecting hidden positive sentiment in customer reviews using transformer-based NLP models.
-
-**What I Need to Do:**I will draft a dedicated abstract (within 200 words) that clearly summarizes:
+**What I Need to Do:** I will draft a dedicated abstract (within 200 words) that clearly summarizes:
 
 *   **The Problem:** The difficulty of uncovering subtle positive sentiment in low-rated reviews.
     
@@ -44,12 +47,12 @@ Table of Contents
 *   **Future Work:** My plan for further model tuning, quantitative evaluation (using metrics like accuracy and F1-score), and extended testing.
     
 
-2\. Introduction
+# 2. Introduction
 ----------------
 
-**What I Have Done:**I have clearly outlined my research problem, objectives, and theoretical challenges. I’ve introduced the idea of hidden sentiment in mixed reviews and explained why it is a critical issue.
+**What I Have Done:** I have clearly outlined my research problem, objectives, and theoretical challenges. I’ve introduced the idea of hidden sentiment in mixed reviews and explained why it is a critical issue.
 
-**What I Need to Do:**I will expand this section by:
+**What I Need to Do:** I will expand this section by:
 
 *   Emphasizing the real-world impact of detecting hidden sentiment, such as enhancing customer insights and improving targeted marketing strategies.
     
@@ -58,12 +61,12 @@ Table of Contents
 *   Highlighting the novelty of my approach, particularly how I plan to combine aspect-based sentiment analysis (ABSA) with transformer models to capture subtle sentiment cues.
     
 
-3\. Literature Review
+# 3. Literature Review
 ---------------------
 
-**What I Have Done:**I have built a solid foundation by citing key studies related to transformer-based models, traditional sentiment analysis, and ABSA. I have demonstrated the limitations of conventional methods in detecting implicit sentiment.
+**What I Have Done:** I have built a solid foundation by citing key studies related to transformer-based models, traditional sentiment analysis, and ABSA. I have demonstrated the limitations of conventional methods in detecting implicit sentiment.
 
-**What I Need to Do:**I will strengthen this section by:
+**What I Need to Do:** I will strengthen this section by:
 
 *   Critically comparing existing work and explicitly identifying the gaps that my research addresses. For example, I will clarify, “Unlike traditional lexicon approaches, my transformer-based method is designed to capture implicit sentiment.”
     
@@ -72,12 +75,12 @@ Table of Contents
 *   Clearly linking the literature gaps to my project’s objectives.
     
 
-4\. Methodology
+# 4. Methodology
 ---------------
 
-**What I Have Done:**I have described my current approach to data collection using a custom-built Chrome extension, preprocessing techniques, and my initial setup for implementing transformer-based models (such as BERT and RoBERTa) using tools like Hugging Face and PyTorch.
+**What I Have Done:** I have described my current approach to data collection using a custom-built Chrome extension, preprocessing techniques, and my initial setup for implementing transformer-based models (such as BERT and RoBERTa) using tools like Hugging Face and PyTorch.
 
-**What I Need to Do:**I will expand on my methodology by:
+**What I Need to Do:** I will expand on my methodology by:
 
 *   Explaining why I chose specific models and tools (e.g., why I opted for BERT over DistilBERT) and how these choices help address the challenge of detecting hidden sentiment.
     
@@ -86,12 +89,12 @@ Table of Contents
 *   Ensuring that all methodological choices are directly aligned with my research objectives.
     
 
-5\. Quality & Results
+# 5. Quality & Results
 ---------------------
 
-**What I Have Done:**I have conducted preliminary exploratory data analysis (EDA), generated word clouds, and examined sentiment distributions in a dataset of approximately 50,000 Amazon reviews.
+**What I Have Done:** I have conducted preliminary exploratory data analysis (EDA), generated word clouds, and examined sentiment distributions in a dataset of approximately 50,000 Amazon reviews.
 
-**What I Need to Do:**I will finalize my results by:
+**What I Need to Do:** I will finalize my results by:
 
 *   Completing the model training process and presenting detailed quantitative metrics (such as accuracy, F1-score, precision, and recall) in tables and charts.
     
@@ -100,24 +103,24 @@ Table of Contents
 *   Addressing dataset biases (e.g., overrepresentation of electronics reviews) and discussing how these might affect the outcomes.
     
 
-6\. Evaluation & Conclusion
+# 6. Evaluation & Conclusion
 ---------------------------
 
-**What I Have Done:**I have begun planning my hypothesis testing, particularly comparing transformer models against traditional methods, and I have reflected on early challenges such as API restrictions.
+**What I Have Done:** I have begun planning my hypothesis testing, particularly comparing transformer models against traditional methods, and I have reflected on early challenges such as API restrictions.
 
-**What I Need to Do:**I will develop a comprehensive evaluation by:
+**What I Need to Do:** I will develop a comprehensive evaluation by:
 
 *   Reflecting on the overall feasibility of my project, including any limitations I encounter (like computational costs or dataset biases).
     
 *   Writing a thorough conclusion that synthesizes my findings, links them back to my original research objectives, and provides clear recommendations for future work (for example, exploring multilingual sentiment analysis or improving model interpretability).
     
 
-7\. References
+# 7. References
 --------------
 
-**What I Have Done:**I have collected a set of relevant studies, including research on BERT, ABSA, and implicit sentiment analysis. My references are currently in Harvard style, but there are some inconsistencies.
+**What I Have Done:** I have collected a set of relevant studies, including research on BERT, ABSA, and implicit sentiment analysis. My references are currently in Harvard style, but there are some inconsistencies.
 
-**What I Need to Do:**I will:
+**What I Need to Do:** I will:
 
 *   Remove duplicate citations (for instance, reducing multiple references to Hoang et al. to a single entry).
     
@@ -126,12 +129,12 @@ Table of Contents
 *   Expand the reference list by including additional high-quality and recent studies from reputable sources such as ACL and IEEE.
     
 
-8\. Appendices
+# 8. Appendices
 --------------
 
-**What I Have Done:**I have included initial appendices with code snippets, a preliminary Gantt chart, and some sample figures (e.g., dataset preview).
+**What I Have Done:** I have included initial appendices with code snippets, a preliminary Gantt chart, and some sample figures (e.g., dataset preview).
 
-**What I Need to Do:**I will enhance this section by:
+**What I Need to Do:** I will enhance this section by:
 
 *   Adding a formal declaration, a cover page, and a list of figures/tables.
     
@@ -143,9 +146,9 @@ Table of Contents
 Final Notes and Target Grade Band
 ---------------------------------
 
-**My Current Progress:**I estimate that my work is currently in the 60–69% range. I have built a solid foundation but still need to address gaps in critical analysis, justify my methodological choices, and refine my presentation.
+**My Current Progress:** I estimate that my work is currently in the 60–69% range. I have built a solid foundation but still need to address gaps in critical analysis, justify my methodological choices, and refine my presentation.
 
-**To Achieve a Grade of 70–89% (Excellent/Very Good):**I will ensure that every section is complete, well-justified, and critically analyzed. I plan to:
+**To Achieve a Grade of 70–89% (Excellent/Very Good):** I will ensure that every section is complete, well-justified, and critically analyzed. I plan to:
 
 *   Provide in-depth connections between objectives, methods, and results.
     
@@ -154,4 +157,4 @@ Final Notes and Target Grade Band
 *   Present clear figures, tables, and comprehensive supporting documentation.
     
 
-**To Reach 90–100% (Outstanding):**I aim to innovate in my methodology and results, such as incorporating a novel dataset or state-of-the-art model comparisons. I will provide exceptional depth in my literature review and evaluation, ensuring flawless alignment between my research objectives, methods, and outcomes.
+**To Reach 90–100% (Outstanding):** I aim to innovate in my methodology and results, such as incorporating a novel dataset or state-of-the-art model comparisons. I will provide exceptional depth in my literature review and evaluation, ensuring flawless alignment between my research objectives, methods, and outcomes.
