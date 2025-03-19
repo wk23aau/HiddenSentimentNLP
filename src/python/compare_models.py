@@ -87,7 +87,7 @@ def main(data_file, model_dir):
 
 if __name__ == '__main__':
     # Hardcoded file and directory paths
-    data_file_path = 'data/processed/combined_processed_data.csv' # <--- HARDCODED DATA FILE PATH
+    data_file_path = 'data/processed/airpods.csv' # <--- HARDCODED DATA FILE PATH
     transformer_model_dir = 'models/bert-sentiment' # <--- HARDCODED MODEL DIRECTORY
 
     main(data_file_path, transformer_model_dir)
