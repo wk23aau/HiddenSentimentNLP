@@ -19,6 +19,7 @@ torch
 transformers
 tokenizers
 safetensors
+pip install transformers[torch]
 
 # ========================
 # Visualization
