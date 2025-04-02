@@ -63,7 +63,7 @@ coverage.xml
 
 # Data files (if you don't want to track raw or processed data)
 data/raw/
-data/processed/
+# data/processed/
 
 # Models and outputs (if you don't want to track large files)
 models/
