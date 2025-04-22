@@ -1,0 +1,27 @@
+{
+    "manifest_version": 3,
+    "name": "Amazon UK Scraper",
+    "version": "1.0",
+    "permissions": [
+      "activeTab",
+      "storage",
+      "scripting"
+    ],
+    "host_permissions": [
+      "http://localhost:5000/*",
+      "https://www.amazon.co.uk/*",
+      "https://www.amazon.com/*"
+    ],
+    "content_scripts": [
+      {
+        "matches": ["https://www.amazon.co.uk/*","https://www.amazon.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'; connect-src http://localhost:5000/"
+    },
+    "action": {
+
+    }
+  }
