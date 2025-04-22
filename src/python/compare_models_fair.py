@@ -1,3 +1,5 @@
+# compare_models_fair.py
+
 import pandas as pd
 import numpy as np
 import argparse

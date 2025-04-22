@@ -1,3 +1,5 @@
+# inference.py
+
 import sys
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
