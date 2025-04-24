@@ -174,7 +174,7 @@ class BaseTransformerTrainer:
             weight_decay=self.config.WEIGHT_DECAY,
             logging_dir="logs",
             logging_steps=100,
-            evaluation_strategy=IntervalStrategy.STEPS,
+            eval_strategy=IntervalStrategy.STEPS,
             eval_steps=500,
             save_strategy=IntervalStrategy.NO,
             load_best_model_at_end=True,
