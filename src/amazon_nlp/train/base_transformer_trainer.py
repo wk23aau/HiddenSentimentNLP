@@ -34,10 +34,7 @@ class ReviewsDataset(Dataset):
         return len(self.labels)
 
 class BaseTransformerTrainer:
-    def __init__(
-        self,
-        model_type: str = "unbalanced",
-    ):
+    def __init__(self, model_type: str = "unbalanced"):
         self.config = ModelConfig
         self.model_name = self.config.MODEL_NAME
         self.model_type = model_type
@@ -58,12 +55,12 @@ class BaseTransformerTrainer:
     def setup_logging(self):
         """Configure file + console logging."""
         logs_dir = Path("logs")
-        logs_dir.mkdir(exist_ok=True)
+        logs_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = logs_dir / f"transformer_{self.model_type}_{timestamp}.log"
+        log_file = logs_dir / f"all_transformers_{timestamp}.log"
         logging.basicConfig(
             level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s",
+            format="%(asctime)s [%(levelname)s] %(message)s",
             handlers=[
                 logging.StreamHandler(),
                 logging.FileHandler(log_file)
@@ -86,15 +83,22 @@ class BaseTransformerTrainer:
         }
 
     def load_datasets(self):
-        """Find and load the latest CSVs for this model type."""
+        """
+        Find and load the latest CSVs for this model type.
+        Expects files named like train_<model_type>_YYYYMMDD_HHMMSS.csv,
+        validation_YYYYMMDD_HHMMSS.csv, test_YYYYMMDD_HHMMSS.csv.
+        """
         data_dir = Path("data/datasets")
-        all_files = list(data_dir.glob(f"*_{self.model_type}_*.csv"))
-        if not all_files:
-            raise FileNotFoundError(f"No datasets found for {self.model_type} in {data_dir}")
-        # Choose latest by timestamp in filename
-        latest = sorted(all_files)[-1].parent
-        logging.info(f"Loading datasets from: {data_dir}")
-        timestamp = sorted(all_files)[-1].stem.split("_")[-1]
+        # only consider train files for this variant
+        all_train = sorted(data_dir.glob(f"train_{self.model_type}_*.csv"))
+        if not all_train:
+            raise FileNotFoundError(f"No train CSVs found for {self.model_type} in {data_dir}")
+
+        latest = all_train[-1]
+        # extract full timestamp after the prefix
+        timestamp = latest.stem.split(f"train_{self.model_type}_")[-1]
+
+        logging.info(f"Loading datasets with timestamp: {timestamp} from {data_dir}")
         df_train = pd.read_csv(data_dir / f"train_{self.model_type}_{timestamp}.csv")
         df_val   = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
         df_test  = pd.read_csv(data_dir / f"test_{timestamp}.csv")
@@ -104,13 +108,16 @@ class BaseTransformerTrainer:
     def prepare_data(self, df_train, df_val, df_test):
         """Tokenize and wrap into PyTorch datasets."""
         enc_train = self.tokenizer(
-            list(df_train["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            list(df_train["text_clean"]), truncation=True, padding=True,
+            max_length=self.config.MAX_LENGTH, return_tensors="pt"
         )
         enc_val = self.tokenizer(
-            list(df_val["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            list(df_val["text_clean"]), truncation=True, padding=True,
+            max_length=self.config.MAX_LENGTH, return_tensors="pt"
         )
         enc_test = self.tokenizer(
-            list(df_test["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            list(df_test["text_clean"]), truncation=True, padding=True,
+            max_length=self.config.MAX_LENGTH, return_tensors="pt"
         )
         train_ds = ReviewsDataset(enc_train, df_train["label"].tolist())
         val_ds   = ReviewsDataset(enc_val,   df_val["label"].tolist())
@@ -139,7 +146,9 @@ class BaseTransformerTrainer:
             greater_is_better=True,
         )
 
-        model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2).to(self.device)
+        model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_name, num_labels=2
+        ).to(self.device)
 
         trainer = Trainer(
             model=model,

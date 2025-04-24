@@ -42,6 +42,17 @@ def push_models():
     """Push datasets to Kaggle and models to Hugging Face."""
     from amazon_nlp.kaggle.push_to_kaggle import main as push_models
     push_models()
+@cli.command()
+def download_data():
+    """Fetch raw DB &/or CSVs from the HF dataset into data/."""
+    from amazon_nlp.utils.hf_data_utils import download_data
+    download_data()
+
+@cli.command()
+def push_datasets():
+    """Push CSV train/val/test back to the HF dataset repo."""
+    from amazon_nlp.scripts.push_datasets_to_hf import main as push_ds
+    push_ds()
 
 @cli.command()
 def predict():

@@ -13,3 +13,5 @@ fastapi
 uvicorn
 kaggle
 click
+datasets
+huggingface-hub
