@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 from datetime import datetime
-from tqdm import tqdm
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
 from torch.utils.data import Dataset
 from transformers import (
     AutoTokenizer,
@@ -17,6 +15,11 @@ from transformers import (
     TrainingArguments,
     EarlyStoppingCallback,
     IntervalStrategy
+)
+from sklearn.metrics import (
+    accuracy_score,
+    precision_recall_fscore_support,
+    roc_auc_score
 )
 from amazon_nlp.config.model_config import ModelConfig
 
@@ -39,7 +42,7 @@ class BaseTransformerTrainer:
         self.model_name = self.config.MODEL_NAME
         self.model_type = model_type
 
-        # Set up output dir for this variant
+        # Output directory
         self.output_dir = Path(
             os.getenv("MODEL_OUTPUT_DIR", self.config.OUTPUT_DIR)
         ) / model_type
@@ -53,7 +56,6 @@ class BaseTransformerTrainer:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
 
     def setup_logging(self):
-        """Configure file + console logging."""
         logs_dir = Path("logs")
         logs_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -70,7 +72,9 @@ class BaseTransformerTrainer:
     def compute_metrics(self, eval_pred):
         logits, labels = eval_pred
         preds = np.argmax(logits, axis=1)
-        precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average="binary")
+        precision, recall, f1, _ = precision_recall_fscore_support(
+            labels, preds, average="binary"
+        )
         acc = accuracy_score(labels, preds)
         probas = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
         auc = roc_auc_score(labels, probas[:, 1].numpy())
@@ -85,49 +89,81 @@ class BaseTransformerTrainer:
     def load_datasets(self):
         """
         Find and load the latest CSVs for this model type.
-        Expects files named like train_<model_type>_YYYYMMDD_HHMMSS.csv,
-        validation_YYYYMMDD_HHMMSS.csv, test_YYYYMMDD_HHMMSS.csv.
+        Expects files named like:
+          train_<model_type>_YYYYMMDD_HHMMSS.csv
+          validation_YYYYMMDD_HHMMSS.csv
+          test_YYYYMMDD_HHMMSS.csv
         """
         data_dir = Path("data/datasets")
-        # only consider train files for this variant
         all_train = sorted(data_dir.glob(f"train_{self.model_type}_*.csv"))
         if not all_train:
-            raise FileNotFoundError(f"No train CSVs found for {self.model_type} in {data_dir}")
+            raise FileNotFoundError(
+                f"No train CSVs found for {self.model_type} in {data_dir}"
+            )
 
         latest = all_train[-1]
-        # extract full timestamp after the prefix
+        # full timestamp portion, e.g. "20250424_181511"
         timestamp = latest.stem.split(f"train_{self.model_type}_")[-1]
 
-        logging.info(f"Loading datasets with timestamp: {timestamp} from {data_dir}")
-        df_train = pd.read_csv(data_dir / f"train_{self.model_type}_{timestamp}.csv")
-        df_val   = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
-        df_test  = pd.read_csv(data_dir / f"test_{timestamp}.csv")
-        logging.info(f"Train size: {len(df_train)}, Val size: {len(df_val)}, Test size: {len(df_test)}")
+        logging.info(f"Loading datasets with timestamp {timestamp} from {data_dir}")
+        df_train = pd.read_csv(
+            data_dir / f"train_{self.model_type}_{timestamp}.csv"
+        )
+        df_val = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
+        df_test = pd.read_csv(data_dir / f"test_{timestamp}.csv")
+        logging.info(
+            f"Sizes → train: {len(df_train)}, val: {len(df_val)}, test: {len(df_test)}"
+        )
         return df_train, df_val, df_test
 
     def prepare_data(self, df_train, df_val, df_test):
-        """Tokenize and wrap into PyTorch datasets."""
+        """
+        Tokenize and wrap into PyTorch Datasets.
+        Automatically uses 'text_clean' if present, otherwise 'text'.
+        """
+        def get_texts(df):
+            if "text_clean" in df.columns:
+                return df["text_clean"].astype(str).tolist()
+            elif "text" in df.columns:
+                return df["text"].astype(str).tolist()
+            else:
+                raise KeyError("No text column found in DataFrame")
+
+        texts_train = get_texts(df_train)
+        texts_val = get_texts(df_val)
+        texts_test = get_texts(df_test)
+
         enc_train = self.tokenizer(
-            list(df_train["text_clean"]), truncation=True, padding=True,
-            max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            texts_train,
+            truncation=True,
+            padding=True,
+            max_length=self.config.MAX_LENGTH,
+            return_tensors="pt"
         )
         enc_val = self.tokenizer(
-            list(df_val["text_clean"]), truncation=True, padding=True,
-            max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            texts_val,
+            truncation=True,
+            padding=True,
+            max_length=self.config.MAX_LENGTH,
+            return_tensors="pt"
         )
         enc_test = self.tokenizer(
-            list(df_test["text_clean"]), truncation=True, padding=True,
-            max_length=self.config.MAX_LENGTH, return_tensors="pt"
+            texts_test,
+            truncation=True,
+            padding=True,
+            max_length=self.config.MAX_LENGTH,
+            return_tensors="pt"
         )
+
         train_ds = ReviewsDataset(enc_train, df_train["label"].tolist())
-        val_ds   = ReviewsDataset(enc_val,   df_val["label"].tolist())
-        test_ds  = ReviewsDataset(enc_test,  df_test["label"].tolist())
+        val_ds = ReviewsDataset(enc_val, df_val["label"].tolist())
+        test_ds = ReviewsDataset(enc_test, df_test["label"].tolist())
         return train_ds, val_ds, test_ds
 
     def train(self, train_ds, val_ds, test_ds):
-        """Run training and evaluation."""
+        """Run the full training and final evaluation."""
         self.setup_logging()
-        logging.info(f"Starting training: {self.model_type}")
+        logging.info(f"Starting training for '{self.model_type}' variant")
 
         args = TrainingArguments(
             output_dir=str(self.output_dir),
@@ -156,10 +192,12 @@ class BaseTransformerTrainer:
             train_dataset=train_ds,
             eval_dataset=val_ds,
             compute_metrics=self.compute_metrics,
-            callbacks=[EarlyStoppingCallback(early_stopping_patience=self.config.EARLY_STOPPING_PATIENCE)],
+            callbacks=[EarlyStoppingCallback(
+                early_stopping_patience=self.config.EARLY_STOPPING_PATIENCE
+            )],
         )
 
         trainer.train()
         metrics = trainer.evaluate(eval_dataset=test_ds)
-        logging.info(f"Test metrics: {metrics}")
+        logging.info(f"Final test metrics: {metrics}")
         return metrics
