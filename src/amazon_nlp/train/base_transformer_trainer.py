@@ -38,7 +38,7 @@ class ReviewsDataset(Dataset):
 
 class BaseTransformerTrainer:
     def __init__(self, model_type: str = "unbalanced"):
-        self.config = ModelConfig
+        self.config     = ModelConfig
         self.model_name = self.config.MODEL_NAME
         self.model_type = model_type
 
@@ -75,15 +75,15 @@ class BaseTransformerTrainer:
         precision, recall, f1, _ = precision_recall_fscore_support(
             labels, preds, average="binary"
         )
-        acc = accuracy_score(labels, preds)
+        acc    = accuracy_score(labels, preds)
         probas = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
-        auc = roc_auc_score(labels, probas[:, 1].numpy())
+        auc    = roc_auc_score(labels, probas[:, 1].numpy())
         return {
-            "accuracy": acc,
+            "accuracy":  acc,
             "precision": precision,
-            "recall": recall,
-            "f1": f1,
-            "roc_auc": auc
+            "recall":    recall,
+            "f1":        f1,
+            "roc_auc":   auc
         }
 
     def load_datasets(self):
@@ -101,16 +101,13 @@ class BaseTransformerTrainer:
                 f"No train CSVs found for {self.model_type} in {data_dir}"
             )
 
-        latest = all_train[-1]
-        # full timestamp portion, e.g. "20250424_181511"
+        latest   = all_train[-1]
         timestamp = latest.stem.split(f"train_{self.model_type}_")[-1]
 
         logging.info(f"Loading datasets with timestamp {timestamp} from {data_dir}")
-        df_train = pd.read_csv(
-            data_dir / f"train_{self.model_type}_{timestamp}.csv"
-        )
-        df_val = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
-        df_test = pd.read_csv(data_dir / f"test_{timestamp}.csv")
+        df_train = pd.read_csv(data_dir / f"train_{self.model_type}_{timestamp}.csv")
+        df_val   = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
+        df_test  = pd.read_csv(data_dir / f"test_{timestamp}.csv")
         logging.info(
             f"Sizes → train: {len(df_train)}, val: {len(df_val)}, test: {len(df_test)}"
         )
@@ -130,8 +127,8 @@ class BaseTransformerTrainer:
                 raise KeyError("No text column found in DataFrame")
 
         texts_train = get_texts(df_train)
-        texts_val = get_texts(df_val)
-        texts_test = get_texts(df_test)
+        texts_val   = get_texts(df_val)
+        texts_test  = get_texts(df_test)
 
         enc_train = self.tokenizer(
             texts_train,
@@ -156,8 +153,8 @@ class BaseTransformerTrainer:
         )
 
         train_ds = ReviewsDataset(enc_train, df_train["label"].tolist())
-        val_ds = ReviewsDataset(enc_val, df_val["label"].tolist())
-        test_ds = ReviewsDataset(enc_test, df_test["label"].tolist())
+        val_ds   = ReviewsDataset(enc_val,   df_val["label"].tolist())
+        test_ds  = ReviewsDataset(enc_test,  df_test["label"].tolist())
         return train_ds, val_ds, test_ds
 
     def train(self, train_ds, val_ds, test_ds):
@@ -166,17 +163,21 @@ class BaseTransformerTrainer:
         logging.info(f"Starting training for '{self.model_type}' variant")
 
         args = TrainingArguments(
-            output_dir=str(self.output_dir),
-            num_train_epochs=self.config.EPOCHS,
+            output_dir=                 str(self.output_dir),
+            num_train_epochs=           self.config.EPOCHS,
             per_device_train_batch_size=self.config.BATCH_SIZE,
-            per_device_eval_batch_size=self.config.BATCH_SIZE,
-            learning_rate=self.config.LEARNING_RATE,
-            weight_decay=self.config.WEIGHT_DECAY,
+            per_device_eval_batch_size= self.config.BATCH_SIZE,
+            learning_rate=              self.config.LEARNING_RATE,
+            weight_decay=               self.config.WEIGHT_DECAY,
             logging_dir="logs",
             logging_steps=100,
+
+            # <— use eval_strategy (not "evaluation_strategy") and match save_strategy
             eval_strategy=IntervalStrategy.STEPS,
-            eval_steps=500,
-            save_strategy=IntervalStrategy.NO,
+            eval_steps=    500,
+            save_strategy=IntervalStrategy.STEPS,
+            save_steps=    500,
+
             load_best_model_at_end=True,
             metric_for_best_model="f1",
             greater_is_better=True,
@@ -187,10 +188,10 @@ class BaseTransformerTrainer:
         ).to(self.device)
 
         trainer = Trainer(
-            model=model,
-            args=args,
-            train_dataset=train_ds,
-            eval_dataset=val_ds,
+            model=           model,
+            args=            args,
+            train_dataset=   train_ds,
+            eval_dataset=    val_ds,
             compute_metrics=self.compute_metrics,
             callbacks=[EarlyStoppingCallback(
                 early_stopping_patience=self.config.EARLY_STOPPING_PATIENCE
