@@ -1,6 +1,9 @@
 # File: src/amazon_nlp/train/base_transformer_trainer.py
 
 import os
+# Disable Weights & Biases in non‐interactive environments (e.g. Kaggle)
+os.environ["WANDB_DISABLED"] = "true"
+
 import logging
 import torch
 import numpy as np
@@ -26,7 +29,7 @@ from amazon_nlp.config.model_config import ModelConfig
 class ReviewsDataset(Dataset):
     def __init__(self, encodings, labels):
         self.encodings = encodings
-        self.labels = labels
+        self.labels    = labels
 
     def __getitem__(self, idx):
         item = {k: v[idx] for k, v in self.encodings.items()}
@@ -59,7 +62,7 @@ class BaseTransformerTrainer:
         logs_dir = Path("logs")
         logs_dir.mkdir(parents=True, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        log_file = logs_dir / f"all_transformers_{timestamp}.log"
+        log_file  = logs_dir / f"all_transformers_{timestamp}.log"
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s [%(levelname)s] %(message)s",
@@ -71,7 +74,7 @@ class BaseTransformerTrainer:
 
     def compute_metrics(self, eval_pred):
         logits, labels = eval_pred
-        preds = np.argmax(logits, axis=1)
+        preds  = np.argmax(logits, axis=1)
         precision, recall, f1, _ = precision_recall_fscore_support(
             labels, preds, average="binary"
         )
@@ -94,14 +97,13 @@ class BaseTransformerTrainer:
           validation_YYYYMMDD_HHMMSS.csv
           test_YYYYMMDD_HHMMSS.csv
         """
-        data_dir = Path("data/datasets")
+        data_dir  = Path("data/datasets")
         all_train = sorted(data_dir.glob(f"train_{self.model_type}_*.csv"))
         if not all_train:
             raise FileNotFoundError(
                 f"No train CSVs found for {self.model_type} in {data_dir}"
             )
-
-        latest   = all_train[-1]
+        latest    = all_train[-1]
         timestamp = latest.stem.split(f"train_{self.model_type}_")[-1]
 
         logging.info(f"Loading datasets with timestamp {timestamp} from {data_dir}")
@@ -137,14 +139,14 @@ class BaseTransformerTrainer:
             max_length=self.config.MAX_LENGTH,
             return_tensors="pt"
         )
-        enc_val = self.tokenizer(
+        enc_val   = self.tokenizer(
             texts_val,
             truncation=True,
             padding=True,
             max_length=self.config.MAX_LENGTH,
             return_tensors="pt"
         )
-        enc_test = self.tokenizer(
+        enc_test  = self.tokenizer(
             texts_test,
             truncation=True,
             padding=True,
@@ -163,16 +165,16 @@ class BaseTransformerTrainer:
         logging.info(f"Starting training for '{self.model_type}' variant")
 
         args = TrainingArguments(
-            output_dir=                 str(self.output_dir),
-            num_train_epochs=           self.config.EPOCHS,
-            per_device_train_batch_size=self.config.BATCH_SIZE,
-            per_device_eval_batch_size= self.config.BATCH_SIZE,
-            learning_rate=              self.config.LEARNING_RATE,
-            weight_decay=               self.config.WEIGHT_DECAY,
+            output_dir=                  str(self.output_dir),
+            num_train_epochs=            self.config.EPOCHS,
+            per_device_train_batch_size= self.config.BATCH_SIZE,
+            per_device_eval_batch_size=  self.config.BATCH_SIZE,
+            learning_rate=               self.config.LEARNING_RATE,
+            weight_decay=                self.config.WEIGHT_DECAY,
             logging_dir="logs",
             logging_steps=100,
 
-            # <— use eval_strategy (not "evaluation_strategy") and match save_strategy
+            # <— use eval_strategy (not evaluation_strategy) and match save_strategy
             eval_strategy=IntervalStrategy.STEPS,
             eval_steps=    500,
             save_strategy=IntervalStrategy.STEPS,
@@ -181,6 +183,10 @@ class BaseTransformerTrainer:
             load_best_model_at_end=True,
             metric_for_best_model="f1",
             greater_is_better=True,
+
+            # Disable built-in loggers (wandb, etc.) when running in notebooks
+            report_to=[],
+            run_name=None,
         )
 
         model = AutoModelForSequenceClassification.from_pretrained(
@@ -188,10 +194,10 @@ class BaseTransformerTrainer:
         ).to(self.device)
 
         trainer = Trainer(
-            model=           model,
-            args=            args,
-            train_dataset=   train_ds,
-            eval_dataset=    val_ds,
+            model=model,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=val_ds,
             compute_metrics=self.compute_metrics,
             callbacks=[EarlyStoppingCallback(
                 early_stopping_patience=self.config.EARLY_STOPPING_PATIENCE
