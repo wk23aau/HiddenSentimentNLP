@@ -1,0 +1,11 @@
+{
+  "manifest_version": 2,
+  "name": "Amazon Sentiment Annotator",
+  "version": "0.1",
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.com/*"],
+      "js": ["content.js"]
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+# File: src/amazon_nlp/train/base_transformer_trainer.py
+
+import os
+import logging
+import torch
+import numpy as np
+import pandas as pd
+from pathlib import Path
+from datetime import datetime
+from tqdm import tqdm
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from torch.utils.data import Dataset
+from transformers import (
+    AutoTokenizer,
+    AutoModelForSequenceClassification,
+    Trainer,
+    TrainingArguments,
+    EarlyStoppingCallback,
+    IntervalStrategy
+)
+from amazon_nlp.config.model_config import ModelConfig
+
+class ReviewsDataset(Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
+
+    def __getitem__(self, idx):
+        item = {k: v[idx] for k, v in self.encodings.items()}
+        item["labels"] = torch.tensor(self.labels[idx], dtype=torch.long)
+        return item
+
+    def __len__(self):
+        return len(self.labels)
+
+class BaseTransformerTrainer:
+    def __init__(
+        self,
+        model_type: str = "unbalanced",
+    ):
+        self.config = ModelConfig
+        self.model_name = self.config.MODEL_NAME
+        self.model_type = model_type
+
+        # Set up output dir for this variant
+        self.output_dir = Path(
+            os.getenv("MODEL_OUTPUT_DIR", self.config.OUTPUT_DIR)
+        ) / model_type
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Device
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logging.info(f"Using device: {self.device}")
+
+        # Tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+
+    def setup_logging(self):
+        """Configure file + console logging."""
+        logs_dir = Path("logs")
+        logs_dir.mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        log_file = logs_dir / f"transformer_{self.model_type}_{timestamp}.log"
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s",
+            handlers=[
+                logging.StreamHandler(),
+                logging.FileHandler(log_file)
+            ]
+        )
+
+    def compute_metrics(self, eval_pred):
+        logits, labels = eval_pred
+        preds = np.argmax(logits, axis=1)
+        precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average="binary")
+        acc = accuracy_score(labels, preds)
+        probas = torch.nn.functional.softmax(torch.tensor(logits), dim=1)
+        auc = roc_auc_score(labels, probas[:, 1].numpy())
+        return {
+            "accuracy": acc,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+            "roc_auc": auc
+        }
+
+    def load_datasets(self):
+        """Find and load the latest CSVs for this model type."""
+        data_dir = Path("data/datasets")
+        all_files = list(data_dir.glob(f"*_{self.model_type}_*.csv"))
+        if not all_files:
+            raise FileNotFoundError(f"No datasets found for {self.model_type} in {data_dir}")
+        # Choose latest by timestamp in filename
+        latest = sorted(all_files)[-1].parent
+        logging.info(f"Loading datasets from: {data_dir}")
+        timestamp = sorted(all_files)[-1].stem.split("_")[-1]
+        df_train = pd.read_csv(data_dir / f"train_{self.model_type}_{timestamp}.csv")
+        df_val   = pd.read_csv(data_dir / f"validation_{timestamp}.csv")
+        df_test  = pd.read_csv(data_dir / f"test_{timestamp}.csv")
+        logging.info(f"Train size: {len(df_train)}, Val size: {len(df_val)}, Test size: {len(df_test)}")
+        return df_train, df_val, df_test
+
+    def prepare_data(self, df_train, df_val, df_test):
+        """Tokenize and wrap into PyTorch datasets."""
+        enc_train = self.tokenizer(
+            list(df_train["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+        )
+        enc_val = self.tokenizer(
+            list(df_val["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+        )
+        enc_test = self.tokenizer(
+            list(df_test["text_clean"]), truncation=True, padding=True, max_length=self.config.MAX_LENGTH, return_tensors="pt"
+        )
+        train_ds = ReviewsDataset(enc_train, df_train["label"].tolist())
+        val_ds   = ReviewsDataset(enc_val,   df_val["label"].tolist())
+        test_ds  = ReviewsDataset(enc_test,  df_test["label"].tolist())
+        return train_ds, val_ds, test_ds
+
+    def train(self, train_ds, val_ds, test_ds):
+        """Run training and evaluation."""
+        self.setup_logging()
+        logging.info(f"Starting training: {self.model_type}")
+
+        args = TrainingArguments(
+            output_dir=str(self.output_dir),
+            num_train_epochs=self.config.EPOCHS,
+            per_device_train_batch_size=self.config.BATCH_SIZE,
+            per_device_eval_batch_size=self.config.BATCH_SIZE,
+            learning_rate=self.config.LEARNING_RATE,
+            weight_decay=self.config.WEIGHT_DECAY,
+            logging_dir="logs",
+            logging_steps=100,
+            evaluation_strategy=IntervalStrategy.STEPS,
+            eval_steps=500,
+            save_strategy=IntervalStrategy.NO,
+            load_best_model_at_end=True,
+            metric_for_best_model="f1",
+            greater_is_better=True,
+        )
+
+        model = AutoModelForSequenceClassification.from_pretrained(self.model_name, num_labels=2).to(self.device)
+
+        trainer = Trainer(
+            model=model,
+            args=args,
+            train_dataset=train_ds,
+            eval_dataset=val_ds,
+            compute_metrics=self.compute_metrics,
+            callbacks=[EarlyStoppingCallback(early_stopping_patience=self.config.EARLY_STOPPING_PATIENCE)],
+        )
+
+        trainer.train()
+        metrics = trainer.evaluate(eval_dataset=test_ds)
+        logging.info(f"Test metrics: {metrics}")
+        return metrics

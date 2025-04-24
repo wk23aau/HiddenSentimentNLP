@@ -1,67 +1,15 @@
-# ========================
-# Data Manipulation
-# ========================
 pandas
-numpy
-
-# ========================
-# Machine Learning & Scientific Computing
-# ========================
 scikit-learn
-scipy
-joblib
-threadpoolctl
-
-# ========================
-# Deep Learning & Transformers
-# ========================
-torch
-transformers
-tokenizers
-safetensors
-pip install transformers[torch]
-
-# ========================
-# Visualization
-# ========================
-matplotlib
-seaborn
-contourpy
-cycler
-fonttools
-kiwisolver
-pillow
-
-# ========================
-# Utilities & Dependencies
-# ========================
-certifi
-charset-normalizer
-colorama
-filelock
-fsspec
-huggingface-hub
-idna
-Jinja2
-MarkupSafe
-packaging
-pyparsing
-python-dateutil
-pytz
-PyYAML
-regex
-requests
 tqdm
-typing_extensions
-tzdata
-urllib3
-flask
-flask_cors
-
-# ========================
-# Other / Miscellaneous
-# ========================
-setuptools
-sympy
-six
-networkx
+google-generativeai
+python-dotenv
+transformers
+huggingface-hub
+torch
+psutil
+imblearn
+tenacity
+fastapi
+uvicorn
+kaggle
+click
